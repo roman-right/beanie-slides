@@ -1,0 +1,48 @@
+/* @theme main */
+
+@import 'default';
+
+@import url("https://fonts.googleapis.com/css?family=Lato:400,900|Roboto+Mono:400,700");
+@import url("https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css");
+svg[data-marp-fitting='svg'] {
+  max-height: 580px; }
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0.5em 0 0 0; 
+  font-family: 'NasuM', 'Roboto Mono', monospace;
+}
+  h1 strong,
+  h2 strong,
+  h3 strong,
+  h4 strong,
+  h5 strong,
+  h6 strong {
+    font-weight: inherit; }
+
+h1 {
+    color: rgb(107, 82, 82);
+    font-size: 1.5em; 
+    position: fixed;
+    left: 40px;
+    top: 20px;
+}
+
+h2 {
+  font-size: 1.5em; }
+
+h3 {
+  font-size: 1.3em; }
+
+h4 {
+  font-size: 1.1em; }
+
+h5 {
+  font-size: 1em; }
+
+h6 {
+  font-size: 0.9em; }
