@@ -2,6 +2,7 @@
 theme: main 
 paginate: true 
 backgroundColor: #fff
+
 marp: true
 ---
 
@@ -33,6 +34,7 @@ class User(BaseModel):
 # Picture of the document
 
 ---
+![bg left:40% 120%](images/figure.jpg)
 
 ```python
 from typing import Optional
