@@ -203,12 +203,11 @@ people = await Person.find(
 ```
 
 ---
-
-# Sort
+![bg](images/sort.jpeg)
 
 ---
 
-![bg left:40% 70%](images/plus_minus.jpeg)
+![bg left:40% 90%](images/plus_minus.png)
 
 ```python
 people = await Person.find(
@@ -218,7 +217,7 @@ people = await Person.find(
 ).to_list()
 ```
 
----
+
 
 ```python
 people = await Person.find(
@@ -228,7 +227,7 @@ people = await Person.find(
 ).to_list()
 ```
 
----
+
 
 ```python
 people = await Product.all().sort(
@@ -241,7 +240,7 @@ people = await Product.all().sort(
 
 ---
 
-# Skip and Limit
+![bg right:30% 70%](images/pagination.png)
 
 ```python
 people = await Person.find(
