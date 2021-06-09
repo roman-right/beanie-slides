@@ -15,6 +15,10 @@ Asynchronous Python ODM for MongoDB
 https://github.com/roman-right/beanie
 
 ---
+
+![bg](images/mongo_db.jpeg)
+
+---
 ![bg](#aaa)
 ![bg 50% 70%](https://raw.githubusercontent.com/samuelcolvin/pydantic/master/docs/logo-white.svg)
 ![bg 50% 70%](images/motor.png)
@@ -30,10 +34,6 @@ class User(BaseModel):
 ```
 
 ---
-
-# Picture of the document
-
----
 ![bg left:40% 120%](images/figure.jpg)
 
 ```python
@@ -44,32 +44,66 @@ from beanie import Document, Indexed
 class Person(Document):
     name: Indexed(str)
     twitter: Optional[str]
-    karma: int = 0
+    rating: int = 0
 
     class Collection:
         name = "persons"
 ```
 
 ---
+
+![bg right 100%](images/nested.gif)
+
+```python
+class Team(BaseModel):
+    name: str
+    description: str
+
+
+class Person(Document):
+    name: Indexed(str)
+    twitter: Optional[str]
+    rating: int = 0
+
+    team: Team
+    created: datetime = Field(
+        default_factory=datetime.utcnow
+    )
+
+    class Collection:
+        name = "persons"
+```
+---
 ![bg right:40%](images/ironman.gif)
 
 ```python
-person = Person(
-    name="Tony Stark",
-    twitter="@Iron_Man"
+team = Team(
+    name="Avengers", 
+    description="A group of strong enough people"
 )
-await person.create()
-print(person)
+tony = Person(
+    name="Tony Stark", 
+    twitter="@Iron_Man", 
+    team=team
+)
+await tony.create()
+print(tony)
 
 ```
 
 Output:
 
 ```python
-id = ObjectId('60be669a4938de2829846785')
-name = 'Tony Stark'
-twitter = '@Iron_Man'
-karma = 0
+id=ObjectId('60c11c5dbce98d02f4eee8d7') 
+name='Tony Stark' 
+twitter='@Iron_Man' 
+rating=0
+team=Team(
+    name='Avengers', 
+    description='A group of strong enough people'
+) 
+created=datetime.datetime(
+    2021, 6, 9, 19, 54, 5, 596329)
 ```
 
 ---
@@ -86,25 +120,6 @@ class Sample(Document):
 
 ---
 
-![bg right 100%](images/nested.gif)
-
-```python
-from pydantic import BaseModel
-
-
-class Team(BaseModel):
-    name: str
-    description: str
-
-
-class Person(Document):
-    name: Indexed(str)
-    twitter: Optional[str]
-    team: Team
-```
-
----
-
 ![bg](images/find.jpeg)
 
 ---
@@ -114,19 +129,22 @@ class Person(Document):
 ![bg left:40% 130%](images/pick_up.gif)
 
 ```python
-person = await Person.get(ObjectId("60be6d2f71afa4600aaaaeb2"))
+person = await Person.get(ObjectId("60c11c5dbce98d02f4eee8d7"))
 ```
 
 Result:
 
 ```python
-id = ObjectId('60be6d2f71afa4600aaaaeb2')
-name = 'Tony Stark'
-twitter = '@Iron_Man'
-team = Team(
-    name='Avengers',
+id=ObjectId('60c11c5dbce98d02f4eee8d7') 
+name='Tony Stark' 
+twitter='@Iron_Man' 
+rating=0
+team=Team(
+    name='Avengers', 
     description='A group of strong enough people'
-)
+) 
+created=datetime.datetime(
+    2021, 6, 9, 19, 54, 5, 596329)
 ```
 
 ---
@@ -153,7 +171,7 @@ agents = await Person.find(
 
 ---
 
-# Find One
+# Find (The) One
 
 ![bg left:40% 80%](images/neo.png)
 
@@ -177,12 +195,15 @@ bar = await Person.find_one(
 #### Example
 
 ```python
-good_guys = await Person.find(
-    Person.karma > 10
+people = await Person.find(
+    Person.created > datetime.datetime(2021, 6, 9)
 ).to_list()
 ```
 
 ---
+# Wrappers
+
+![bg left:40%](images/wraps3.jpeg)
 
 ```python
 from beanie.operators import In
@@ -194,7 +215,9 @@ red_and_blue = await Person.find(
 
 ---
 
-![bg left:40% ](images/mongo_logo_1.jpeg)
+# MongoDB syntax
+
+![bg right:40% ](images/mongo_logo_1.jpeg)
 
 ```python
 people = await Person.find(
@@ -213,7 +236,7 @@ people = await Person.find(
 people = await Person.find(
     Person.team.name = "Red"
 ).sort(
-    -Person.karma
+    -Person.created
 ).to_list()
 ```
 
@@ -223,7 +246,7 @@ people = await Person.find(
 people = await Person.find(
     Person.team.name = "Red"
 ).sort(
-    "-karma"
+    "-created"
 ).to_list()
 ```
 
@@ -232,7 +255,7 @@ people = await Person.find(
 ```python
 people = await Product.all().sort(
     [
-        (Person.karma, pymongo.DESCENDING),
+        (Person.created, pymongo.DESCENDING),
         (Person.name, pymongo.ASCENDING),
     ]
 ).to_list()
@@ -263,7 +286,7 @@ people = await Person.find(
 ```python
 class PersonShortView(BaseModel):
     name: str
-    karma: int
+    created: int
 
 
 people = await Person.find(
@@ -299,7 +322,7 @@ await Person.find_one(
 ```python
 await Person.find(
     Person.team.name == "Villains"
-).update(Inc({Person.karma: -10}))
+).update(Inc({Person.rating: -10}))
 ```
 
 ---
@@ -319,7 +342,7 @@ set(), inc(), current_date()
 ```python
 await Person.find(
     Person.team.name == "Red"
-).set({Person.karma: 100})
+).set({Person.rating: 100})
 
 ```
 
@@ -327,13 +350,15 @@ await Person.find(
 
 # Wrappers
 
+![bg left:40%](images/wraps2.jpg)
+
 ```python
 from beanie.operators import Inc
 
 await Person.find(
     Person.team.name == "Blue"
 ).update(
-    Inc({Person.karma: 15})
+    Inc({Person.rating: 15})
 )
 ```
 
@@ -341,94 +366,100 @@ await Person.find(
 
 # Native MongoDB Syntax
 
-![bg left:40%](images/mongo_logo_1.jpeg)
+![bg right:40%](images/mongo_logo_1.jpeg)
 
 ```python
 await Person.find(
     Person.team.name == "Blue"
 ).update(
-    {"$inc": {Person.karma: 15}
+    {"$inc": {Person.rating: 15}
 )
 ```
 
 ---
 
-# Aggregations
+![bg 80%](images/aggregations.png)
 
 ---
 
+![bg left:40%](images/graps2.jpg)
+
 ```python
-class OutputItem(BaseModel):
-    id: str = Field(None, alias="_id")
-    average_karma: int
+class PizzaMetrics(BaseModel):
+    decade: str = Field(None, alias="_id")
+    base: float
+    cheese: float
 
 
-result = await Person.aggregate(
+result = await Pizza.aggregate(
     [
         {
             "$group": {
-                "_id": "$team.name",
-                "average_karma": {"$avg": "$karma"}
+                "_id": "$decade",
+                "base": {"$avg": "$base"},
+                "cheese": {"$avg": "$cheese"},
             }
         }
     ],
-    projection_model=OutputItem
+    projection_model=PizzaMetrics
 ).to_list()
 ```
 
----
-
-Result:
-
 ```python
-[OutputItem(id='Blue', average_karma=4),
- OutputItem(id='Red', average_karma=8),
- OutputItem(id='Avengers', average_karma=11),
- OutputItem(id='Agents', average_karma=1),
- OutputItem(id='Resistance', average_karma=15)]
+[PizzaMetrics(decade='70s', base=10, cheese=2),
+ PizzaMetrics(decade='80s', base=20, cheese=4),
+ PizzaMetrics(decade='90s', base=25, cheese=20),
+ PizzaMetrics(decade='00s', base=10, cheese=20),
+ PizzaMetrics(decade='10s', base=2, cheese=2)]
 ```
 
 ---
 
 # Filter
 
+![bg left:40% 112%](images/margarita.jpeg)
+
 ```python
-class OutputItem(BaseModel):
-    id: str = Field(None, alias="_id")
-    min_karma: int
-
-
-result = await Person.find(
-    Person.karma > 0
+result = await Pizza.find(
+    Pizza.type == "Margherita"
 ).aggregate(
-    [{"$group": {"_id": "$team.name", "min_karma": {"$min": "$karma"}}}],
-    projection_model=OutputItem
+    [
+        {
+            "$group": {
+                "_id": "$decade",
+                "base": {"$avg": "$base"},
+                "cheese": {"$avg": "$cheese"},
+            }
+        }
+    ],
+    projection_model=PizzaMetrics
 ).to_list()
 ```
 
 ---
 
+# Without projection
+
 ```python
-result = await Person.aggregate(
+result = await Pizza.aggregate(
     [
         {
             "$group": {
-                "_id": "$team.name",
-                "min_karma": {"$min": "$karma"}
+                "_id": "$decade",
+                "base": {"$avg": "$base"},
+                "cheese": {"$avg": "$cheese"},
             }
         }
     ]
 ).to_list()
 ```
 
----
-
 ```python
-[{'_id': 'Blue', 'min_karma': 3.0},
- {'_id': 'Red', 'min_karma': 8.0},
- {'_id': 'Avengers', 'min_karma': 11.0},
- {'_id': 'Agents', 'min_karma': 1.0},
- {'_id': 'Resistance', 'min_karma': 15.0}]
+[{"_id":"70s", "base":10, "cheese":2},
+ {"_id":"80s", "base":20, "cheese":4},
+ {"_id":"90s", "base":25, "cheese":20},
+ {"_id":"00s", "base":10, "cheese":20},
+ {"_id":"10s", "base":2, "cheese":2}]
 ```
 
 ---
@@ -441,11 +472,13 @@ sum(), avg(), min(), max()
 
 #### Example
 
+![bg left:40%](images/pizza2.jpg)
+
 ```python
 
-avg_karma: float = Person.find(
-    Person.team.name == "RED"
-).avg(Person.karma)
+max_margherita_diameter = await Pizza.find(
+    Pizza.type == "Margherita"
+).max(Pizza.diameter)
 
 ```
 
@@ -454,6 +487,8 @@ avg_karma: float = Person.find(
 ![bg 100%](images/fastapi.png)
 
 ---
+
+![bg left:40% 100%](images/create.jpeg)
 
 ```python
 @router.post("/persons/", response_model=Person)
@@ -474,25 +509,31 @@ async def get_list():
 ---
 
 ```python
-@router.put("/persons/{person_id}/update_karma", response_model=Person)
-async def update_karma(person_id: ObjectId, karma: float):
+@router.put("/persons/{person_id}/update_rating", response_model=Person)
+async def update_rating(person_id: ObjectId, rating: float):
     person = Person.get(person_id)
-    await person.inc({Person.karma: karma})
+    await person.inc({Person.rating: rating})
     return person
 ```
 
 ---
 
 ```python
-@router.delete("/persons/{person_id}/update_karma")
-async def update_karma(person_id: ObjectId, karma: float):
+@router.delete("/persons/{person_id}")
+async def delete(person_id: ObjectId):
     person = await Person.find_one(Person.id == person_id).delete()
     return {"status": "OK"}
 ```
+---
+
+# Other features
+
+- indexes
+- 
 
 ---
 
-# Plans
+![bg](images/future.jpg)
 
 ---
 
