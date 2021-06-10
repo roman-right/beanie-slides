@@ -10,13 +10,48 @@ marp: true
 
 ---
 
-Asynchronous Python ODM for MongoDB
 
-https://github.com/roman-right/beanie
+![bg](images/mongo_db.jpeg)
 
 ---
 
-![bg](images/mongo_db.jpeg)
+![bg left:40% 100%](images/json.png)
+```json
+[
+    {
+        "_id": {
+            "$oid": "60c1e0a8b889bff62d97b72d"
+        },
+        "name": "Tony Stark",
+        "twitter": "@Iron_Man",
+        "team": {
+            "name": "Avengers",
+            "description": "A group of strong enough people"
+        },
+        "created": {
+            "$date": {
+                "$numberLong": "1623268445596"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "60c1e0cbb889bff62d97b72e"
+        },
+        "name": "Thomas Anderson",
+        "twitter": null,
+        "team": {
+            "name": "Resistance",
+            "description": ""
+        },
+        "created": {
+            "$date": {
+                "$numberLong": "1623269028565"
+            }
+        }
+    }
+]
+```
 
 ---
 ![bg](#aaa)
@@ -28,9 +63,20 @@ https://github.com/roman-right/beanie
 ```python
 class User(BaseModel):
     id: int
-    name = 'John Doe'
-    signup_ts: Optional[datetime] = None
+    name: str = 'John Doe'
+    ts: Optional[datetime]
     friends: List[int] = []
+```
+```python
+user_dict = {
+    "id": 10,
+    "name": "Anna"
+}
+user = User.parse_obj(user_dict)
+print(user)
+```
+```python
+User(id=10, name='Anna', ts=None, friends=[])
 ```
 
 ---
@@ -116,6 +162,16 @@ from uuid import UUID, uuid4
 
 class Sample(Document):
     id: UUID = Field(default_factory=uuid4())
+    name: str
+```
+```python
+sample = Sample(name="Test")
+await sample.create()
+print(sample)
+```
+```python
+id=UUID('7b7fea05-7a47-42ba-a1f9-3bf432034737')
+name="Test"
 ```
 
 ---
@@ -156,7 +212,7 @@ async generator
 
 ```python
 async for person in Person.find(
-        Product.team.name == "Agents"
+        Person.team.name == "Agents"
 ):
     print(person)
 ```
@@ -165,7 +221,7 @@ list
 
 ```python
 agents = await Person.find(
-    Product.team.name == "Agents"
+    Person.team.name == "Agents"
 ).to_list()
 ```
 
@@ -199,11 +255,21 @@ people = await Person.find(
     Person.created > datetime.datetime(2021, 6, 9)
 ).to_list()
 ```
+```python
+[Person(..., created=datetime.datetime(2021, 6, 9, 20)),
+Person(..., created=datetime.datetime(2021, 6, 9, 21)),
+Person(..., created=datetime.datetime(2021, 6, 9, 23))
+Person(..., created=datetime.datetime(2021, 6, 10, 10)),]
+```
 
 ---
 # Wrappers
 
 ![bg left:40%](images/wraps3.jpeg)
+
+```python
+In, Near, Exists, Nor...
+```
 
 ```python
 from beanie.operators import In
@@ -226,11 +292,8 @@ people = await Person.find(
 ```
 
 ---
-![bg](images/sort.jpeg)
 
----
-
-![bg left:40% 90%](images/plus_minus.png)
+![bg left:40% 100%](images/sorting_machine.gif)
 
 ```python
 people = await Person.find(
@@ -268,6 +331,8 @@ people = await Product.all().sort(
 ```python
 people = await Person.find(
     Person.team.name == "Blue"
+).sort(
+    Person.created
 ).skip(2).to_list()
 ```
 
@@ -296,9 +361,66 @@ people = await Person.find(
 
 ---
 
-# Update
+# Projections
 
-pic here
+![bg left:40%](images/projection.jpeg)
+
+```python
+class PersonShortView(BaseModel):
+    name: str
+    created: int
+    team: str
+
+    class Settings:
+        projection = {"name": 1, 
+                      "created": 1, 
+                      "team": "$team.name"}
+
+
+people = await Person.find(
+    Person.team.name == "Red"
+).project(PersonShortView).to_list()
+```
+
+---
+
+![bg 70%](images/update_splash.jpg)
+
+---
+
+![bg left:40% 130%](images/pick_up.gif)
+
+```python
+person = await Person.get(
+    ObjectId("60c11c5dbce98d02f4eee8d7")
+)
+person.name = "Robert"
+await person.replace()
+```
+
+---
+
+![bg left:40% 130%](images/pick_up.gif)
+
+```python
+person = await Person.get(
+    ObjectId("60c11c5dbce98d02f4eee8d7")
+)
+await person.update(
+    Set({Person.twitter: "@RobertDowneyJr"})
+)
+```
+
+---
+# Many
+
+![bg right:40% 110%](images/squad.jpeg)
+
+```python
+await Person.find(
+    Person.team.name == "Villains"
+).update(Inc({Person.rating: -10}))
+```
 
 ---
 
@@ -315,19 +437,9 @@ await Person.find_one(
 
 ---
 
-# Many
-
-![bg right:40% 110%](images/squad.jpeg)
-
-```python
-await Person.find(
-    Person.team.name == "Villains"
-).update(Inc({Person.rating: -10}))
-```
-
----
-
 # Preset methods
+
+![bg right:40%](images/points.jpg)
 
 #### Methods
 
@@ -341,8 +453,8 @@ set(), inc(), current_date()
 
 ```python
 await Person.find(
-    Person.team.name == "Red"
-).set({Person.rating: 100})
+    Person.team.name == "Gryffindor"
+).inc({Person.rating: 100})
 
 ```
 
@@ -351,6 +463,11 @@ await Person.find(
 # Wrappers
 
 ![bg left:40%](images/wraps2.jpg)
+
+```python
+Set, Min, Max, Mul and etc..
+
+```
 
 ```python
 from beanie.operators import Inc
@@ -380,6 +497,17 @@ await Person.find(
 
 ![bg 80%](images/aggregations.png)
 
+---
+![bg right:40%](images/pizza.jpeg)
+
+```python
+class Pizza(Document):
+    name: str
+    base: float
+    cheese: float
+    diameter: int
+    decade: str
+```
 ---
 
 ![bg left:40%](images/graps2.jpg)
@@ -421,7 +549,7 @@ result = await Pizza.aggregate(
 
 ```python
 result = await Pizza.find(
-    Pizza.type == "Margherita"
+    Pizza.name == "Margherita"
 ).aggregate(
     [
         {
@@ -477,7 +605,7 @@ sum(), avg(), min(), max()
 ```python
 
 max_margherita_diameter = await Pizza.find(
-    Pizza.type == "Margherita"
+    Pizza.name == "Margherita"
 ).max(Pizza.diameter)
 
 ```
@@ -491,45 +619,95 @@ max_margherita_diameter = await Pizza.find(
 ![bg left:40% 100%](images/create.jpeg)
 
 ```python
-@router.post("/persons/", response_model=Person)
+@router.post(
+    "/persons/", 
+    response_model=Person)
 async def create(person: Person):
     await person.create()
     return person
 ```
-
----
-
-```python
-@router.get("/persons/", response_model=List[Person])
-async def get_list():
-    persons = await Person.all().to_list()
-    return persons
+```json
+{
+    "name": "Thor",
+    "team": {
+        "name":"Avengers",
+        "description":"A group of strong enough people"
+    }
+}
+```
+```json
+{
+    "id": "60c216c181efcce3bc01f0a4", 
+    "name": "Thor", 
+    "twitter": null, 
+    "rating": 0, 
+    "team": {
+        "name": "Avengers", 
+        "description": "A group of strong enough people"
+    }, 
+    "created": "2021-06-10T13:42:25.645244"}
 ```
 
 ---
 
+![bg right:40% 100%](images/read.jpeg)
+
 ```python
-@router.put("/persons/{person_id}/update_rating", response_model=Person)
-async def update_rating(person_id: ObjectId, rating: float):
+@router.get(
+    "/persons/", 
+    response_model=List[Person])
+async def get_list():
+    persons = await Person.all().to_list()
+    return persons
+```
+```python
+@router.get(
+    "/persons/{person_id}", 
+    response_model=Person)
+async def get():
     person = Person.get(person_id)
-    await person.inc({Person.rating: rating})
     return person
 ```
 
 ---
 
+![bg left:40% 100%](images/update2.jpeg)
+
+```python
+class Rating(BaseModel):
+    value: float
+
+@router.put(
+    "/persons/{person_id}/update_rating", 
+    response_model=Person)
+async def update_rating(
+    person_id: ObjectId, 
+    rating: Rating
+):
+    person = Person.get(person_id)
+    await person.inc({Person.rating: rating.value})
+    return person
+```
+
+---
+
+![bg right:40% 100%](images/delete.jpeg)
+
 ```python
 @router.delete("/persons/{person_id}")
 async def delete(person_id: ObjectId):
-    person = await Person.find_one(Person.id == person_id).delete()
+    person = await Person.find_one(
+        Person.id == person_id
+    ).delete()
     return {"status": "OK"}
 ```
 ---
 
 # Other features
 
-- indexes
-- 
+- Migrations
+- Indexes
+- Sessions and transactions
 
 ---
 
