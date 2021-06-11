@@ -665,7 +665,7 @@ async def get_list():
     "/persons/{person_id}", 
     response_model=Person)
 async def get():
-    person = Person.get(person_id)
+    person = await Person.get(person_id)
     return person
 ```
 
@@ -684,7 +684,7 @@ async def update_rating(
     person_id: ObjectId, 
     rating: Rating
 ):
-    person = Person.get(person_id)
+    person = await Person.get(person_id)
     await person.inc({Person.rating: rating.value})
     return person
 ```
@@ -708,6 +708,8 @@ async def delete(person_id: ObjectId):
 - Migrations
 - Indexes
 - Sessions and transactions
+
+Documentation: <https://roman-right.github.io/beanie/>
 
 ---
 

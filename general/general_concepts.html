@@ -469,7 +469,7 @@ max_margherita_diameter = <span class="hljs-keyword">await</span> Pizza.find(
     <span class="hljs-string">&quot;/persons/{person_id}&quot;</span>, 
     response_model=Person</span>)</span>
 <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get</span>():</span>
-    person = Person.get(person_id)
+    person = <span class="hljs-keyword">await</span> Person.get(person_id)
     <span class="hljs-keyword">return</span> person
 </span></span></foreignObject></svg></code></pre>
 </section>
@@ -483,7 +483,7 @@ max_margherita_diameter = <span class="hljs-keyword">await</span> Pizza.find(
     person_id: ObjectId, 
     rating: Rating
 </span>):</span>
-    person = Person.get(person_id)
+    person = <span class="hljs-keyword">await</span> Person.get(person_id)
     <span class="hljs-keyword">await</span> person.inc({Person.rating: rating.value})
     <span class="hljs-keyword">return</span> person
 </span></span></foreignObject></svg></code></pre>
@@ -503,6 +503,7 @@ max_margherita_diameter = <span class="hljs-keyword">await</span> Pizza.find(
 <li>Indexes</li>
 <li>Sessions and transactions</li>
 </ul>
+<p>Documentation: <a href="https://roman-right.github.io/beanie/">https://roman-right.github.io/beanie/</a></p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section data-paginate="true" data-background-color="#fff" data-theme="main" data-marpit-pagination="41" data-marpit-pagination-total="44" style="--paginate:true;--background-color:#fff;--theme:main;background-color:#fff;background-image:none;" data-marpit-advanced-background="background"><div data-marpit-advanced-background-container="true" data-marpit-advanced-background-direction="horizontal"><figure style="background-image:url(&quot;images/future.jpg&quot;);"></figure></div></section></foreignObject><foreignObject width="1280" height="720"><section id="41" data-paginate="true" data-background-color="#fff" data-theme="main" data-marpit-pagination="41" data-marpit-pagination-total="44" style="--paginate:true;--background-color:#fff;--theme:main;background-color:#fff;background-image:none;" data-marpit-advanced-background="content"></section>
 </foreignObject><foreignObject width="1280" height="720" data-marpit-advanced-background="pseudo"><section style="" data-marpit-advanced-background="pseudo" data-marpit-pagination="41" data-marpit-pagination-total="44"></section></foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="42" data-paginate="true" data-background-color="#fff" data-theme="main" data-marpit-pagination="42" data-marpit-pagination-total="44" style="--paginate:true;--background-color:#fff;--theme:main;background-color:#fff;background-image:none;">
